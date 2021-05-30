@@ -9,31 +9,21 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QDialog, QFileDialog, QGraphicsScene
 from PyQt5.uic import loadUi
 import os
+import numpy as np
+import pydicom
+import utils
 
 class Ui_Dialog(QDialog):
-    def __init__(self):
+    def __init__(self, Dialog):
         super().__init__()
-        path = os.getcwd()#'D:/lab/thyroid/thyroid-labeler-master'
+        path = 'D:/lab/thyroid/thyroid-labeler-master'
         os.chdir(path)
         loadUi('labeler.ui', self)
-        self.openfile_1.clicked.connect(self.load_clicked, 1)
-        self.openfile_2.clicked.connect(self.load_clicked, 2)
-        self.graphicsView_3.window = 1
-        self.graphicsView_4.window = 2
-        print("ass")
 
-    def load_clicked(self, subwindow):
-        print("suck")
-        fname, _filter = QFileDialog.getOpenFileName(self, 'open file', '~/Desktop',
-                                                     "Image Files (*.dcm *DCM)")
-        if subwindow == 1:
-            self.imgLabel_1.load_dicom_image(fname)
-        elif subwindow == 2:
-            self.imgLabel_2.load_dicom_image(fname)
-    def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(1129, 698)
         self.savecrop = QtWidgets.QPushButton(Dialog)
@@ -65,9 +55,33 @@ class Ui_Dialog(QDialog):
         self.graphicsView_3.setObjectName("graphicsView_3")
         self.graphicsView_4 = QtWidgets.QGraphicsView(self.splitter)
         self.graphicsView_4.setObjectName("graphicsView_4")
+        self.scene1 = QGraphicsScene()
+        self.scene2 = QGraphicsScene()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+
+        self.openfile_1.clicked.connect(lambda: self.load_clicked(1))
+        self.openfile_2.clicked.connect(lambda: self.load_clicked(2))
+        self.dcm_image = None
+        self.image = None
+        self.imgr = None
+        self.imgc = None
+
+
+
+    def load_clicked(self, subwindow):
+        print("suck")
+        fname, _filter = QFileDialog.getOpenFileName(self, 'open file', '~/Desktop')
+        if subwindow == 1:
+            self.load_dicom_image(fname, 1)
+            self.graphicsView_3.setScene(self.scene1)
+            self.graphicsView_3.show()
+        elif subwindow == 2:
+            self.load_dicom_image(fname, 2)
+            self.graphicsView_4.setScene(self.scene2)
+            self.graphicsView_4.show()
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -77,12 +91,34 @@ class Ui_Dialog(QDialog):
         self.openfile_1.setText(_translate("Dialog", "openfile"))
         self.openfile_2.setText(_translate("Dialog", "openfile"))
 
+    def display_image(self, scene):
+        qformat = QImage.Format_Grayscale16
+        if scene == 1:
+            view = self.graphicsView_3
+            scene = self.scene1
+        elif scene == 2:
+            view = self.graphicsView_4
+            scene = self.scene2
+        w, h = view.width(), view.height()
+        img = QImage(self.dcm_image, self.dcm_image.shape[1],
+                     self.dcm_image.shape[0], qformat)
+        backlash = view.lineWidth()*2
+        scene.addPixmap(QPixmap.fromImage(img).scaled(w-backlash, h-backlash, Qt.IgnoreAspectRatio))
+        view.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+
+    def load_dicom_image(self, fname, scene):
+        dcm = pydicom.dcmread(fname, force=True)
+        dcm.file_meta.TransferSyntaxUID = pydicom.uid.ImplicitVRLittleEndian
+        print(np.nanmax(dcm.pixel_array), np.nanmin(dcm.pixel_array))
+        self.image = dcm.pixel_array.astype(np.uint8)
+        self.dcm_image = self.image.copy()
+        self.imgr, self.imgc = self.dcm_image.shape[0:2]
+        self.display_image(scene)
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
+    ui = Ui_Dialog(Dialog)
     Dialog.show()
     sys.exit(app.exec_())

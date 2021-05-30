@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-import cv2
+
 import numpy as np
 import pydicom
 
