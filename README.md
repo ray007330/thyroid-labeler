@@ -3,6 +3,8 @@ a labeling tool for medical image data annotation
 
 ![Image](https://github.com/ray007330/thyroid-labeler/blob/master/assets/introduction.png)
 
+## Requirments
+PyQt5, numpy, pydicom, opencv
 ## How to use
 
 1.Load your images by clicking the "openfile" buttons. (The reference image is labeled by doctor and the original image is not labeled and clear.)
