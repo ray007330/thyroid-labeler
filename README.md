@@ -13,3 +13,6 @@ a labeling tool for medical image data annotation
 
 4.Click the "save" button to save the crop region, the original image, the position of the crop region and the original dicom file.
 
+## Collaborator
+
+ray007330, ben980828,  StephenHuang1215
