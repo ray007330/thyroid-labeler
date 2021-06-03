@@ -251,12 +251,16 @@ class Ui_Dialog(QDialog):
             # save original image numpy and crop image
             with open(self.dcm_fname+suffix, 'wb') as f:
                 np.save(f, self.dcm_image_2)
+                f.close()
             with open('crop.npy', 'wb') as f:
                 np.save(f, crop_img)
+                f.close()
             # save positions
             with open('positions.txt', 'w') as f:
                 f.write(' '.join([str(int(x1*self.w_ratio)), str(int(y1*self.h_ratio)), str(int(x2*self.w_ratio)), str(int(y2*self.h_ratio))]))
+                f.close()
             print('Saving files succeed!')
+            os.chdir(os.path.abspath(os.path.join(os.getcwd(), os.path.pardir)))
 
 
          
