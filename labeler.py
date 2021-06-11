@@ -176,10 +176,10 @@ class Ui_Dialog(QDialog):
         # print(np.nanmax(dcm.pixel_array), np.nanmin(dcm.pixel_array))
         self.image = dcm.pixel_array.astype(np.uint8)
         if scene == 1:
-            self.dcm_image_1 = np.stack((self.image,)*3, axis=-1)
+            self.dcm_image_1 = np.stack((self.image,)*3, axis=-1) if len(self.image.shape) == 2 else self.image
         # default save dir
         if scene == 2:
-            self.dcm_image_2 = np.stack((self.image,)*3, axis=-1)
+            self.dcm_image_2 = np.stack((self.image,)*3, axis=-1) if len(self.image.shape) == 2 else self.image
             self.dcm = dcm
             save_dir, self.dcm_fname = fname.split('/')[:-1], fname.split('/')[-1]
             self.textEdit_2.setPlainText('/'.join(save_dir)+"/"+dcm.PatientID)
